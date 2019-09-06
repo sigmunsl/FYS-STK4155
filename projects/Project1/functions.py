@@ -27,10 +27,11 @@ def VarianceBeta(design, _lambda):
 
 def MSE(y,ytilde):
     MeanSquaredError = (np.sum((y-ytilde)**2))/len(y)
+    return MeanSquaredError
 
 def R2Score(y,ytilde):
     mean_value   = (np.sum(y))/len(y)
     numerator    = (np.sum((y-ytilde)**2))
     denomenator  = (np.sum((y-mean_value)**2))
     R2           = (1-(numerator/denomenator))
-    return R2  
+    return R2
