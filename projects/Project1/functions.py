@@ -20,3 +20,17 @@ def RidgeRegression(design, data, _lambda):
     inverse_term   = np.inv(design.T.dot(design)+ _lambda*np.eye((design.shape[1]))
     beta           = inverse_term.dot(design.T).dot(data)
     return beta
+
+def VarianceBeta(design, _lambda):
+    vb = np.linalg.inv(design.T.dot(design) + _lambda*np.eye((design.shape[1])))
+    return np.diag(vb)
+
+def MSE(y,ytilde):
+    MeanSquaredError = (np.sum((y-ytilde)**2))/len(y)
+
+def R2Score(y,ytilde):
+    mean_value   = (np.sum(y))/len(y)
+    numerator    = (np.sum((y-ytilde)**2))
+    denomenator  = (np.sum((y-mean_value)**2))
+    R2           = (1-(numerator/denomenator))
+    return R2  
