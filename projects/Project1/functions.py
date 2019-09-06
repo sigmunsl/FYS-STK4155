@@ -25,11 +25,11 @@ def VarianceBeta(design, _lambda):
     vb = np.linalg.inv(design.T.dot(design) + _lambda*np.eye((design.shape[1])))
     return np.diag(vb)
 
-def MSE(y,ytilde):
+def MSE1d(y,ytilde):
     MeanSquaredError = (np.sum((y-ytilde)**2))/len(y)
     return MeanSquaredError
 
-def R2Score(y,ytilde):
+def R2Score1d(y,ytilde):
     mean_value   = (np.sum(y))/len(y)
     numerator    = (np.sum((y-ytilde)**2))
     denomenator  = (np.sum((y-mean_value)**2))
