@@ -27,7 +27,7 @@ def RidgeRegression(design, data, _lambda):
     beta           = inverse_term.dot(design.T).dot(data)
     return beta
 
-def VarianceBeta(design, _lambda):
+def VarianceBeta(design, _lambda=0):
     vb = np.linalg.inv(design.T.dot(design) + _lambda*np.eye((design.shape[1])))
     return np.diag(vb)
 
