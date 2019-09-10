@@ -10,22 +10,25 @@ def FrankeFunction(x, y, noise_level=0):
     noise = noise_level*np.random.randn(len(x),len(y))
     return term1 + term2 + term3 + term4 + noise
 
-def OridinaryLeastSquares(design, data):
+def OridinaryLeastSquares(design, data, test):
     inverse_term   = np.linalg.inv(design.T.dot(design))
     beta           = inverse_term.dot(design.T).dot(data)
-    return beta
+    pred           = test @ beta
+    return beta, pred
 
-def OridinaryLeastSquares_SVD(design, data):
+def OridinaryLeastSquares_SVD(design, data, test):
     U,_sigma,V     = np.linalg.svd(design.T.dot(design))
     inverse_term   = 23
     beta           = inverse_term.dot(design.T).dot(data)
-    return beta
+    pred           = test @ beta
+    return beta, pred
 
 
-def RidgeRegression(design, data, _lambda):
+def RidgeRegression(design, data, test, _lambda):
     inverse_term   = np.linalg.inv(design.T.dot(design)+ _lambda*np.eye((design.shape[1])))
     beta           = inverse_term.dot(design.T).dot(data)
-    return beta
+    pred           = test @ beta
+    return beta, pred
 
 def VarianceBeta(design, _lambda=0):
     vb = np.linalg.inv(design.T.dot(design) + _lambda*np.eye((design.shape[1])))
@@ -85,3 +88,10 @@ def DesignDesign(x, y, power):
 
     DesignMatrix = np.concatenate((np.ones((len(X),1)),DesignMatrix), axis = 1)
     return DesignMatrix
+
+
+def k_fold_cv(k, data, predictor):
+    data = np.reshape(k, int(len(data[0,:])/k), len(data[:,0]))
+    # fold fixed
+    # TODO: create loop, predict compute error and then return.
+    return
