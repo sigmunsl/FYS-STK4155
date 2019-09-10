@@ -15,6 +15,12 @@ def OridinaryLeastSquares(design, data):
     beta           = inverse_term.dot(design.T).dot(data)
     return beta
 
+def OridinaryLeastSquares_SVD(design, data):
+    U,_sigma,V     = np.linalg.svd(design.T.dot(design))
+    inverse_term   = 23
+    beta           = inverse_term.dot(design.T).dot(data)
+    return beta
+
 
 def RidgeRegression(design, data, _lambda):
     inverse_term   = np.linalg.inv(design.T.dot(design)+ _lambda*np.eye((design.shape[1])))
@@ -36,7 +42,7 @@ def R2Score(y, ytilde):
     R2           = (1-(numerator/denomenator))
     return R2
 
-def CreateDesignMatrix_X(x, y, n = 5):
+def CreateDesignMatrix_X_morten(x, y, n = 5):
 	"""
 	Function for creating a design X-matrix with rows [1, x, y, x^2, xy, xy^2 , etc.]
 	Input is x and y mesh or raveled mesh, keyword agruments n is the degree of the polynomial you want to fit.
