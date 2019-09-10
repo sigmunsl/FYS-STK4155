@@ -36,11 +36,30 @@ def R2Score(y, ytilde):
     R2           = (1-(numerator/denomenator))
     return R2
 
+def CreateDesignMatrix_X(x, y, n = 5):
+	"""
+	Function for creating a design X-matrix with rows [1, x, y, x^2, xy, xy^2 , etc.]
+	Input is x and y mesh or raveled mesh, keyword agruments n is the degree of the polynomial you want to fit.
+	"""
+	if len(x.shape) > 1:
+		x = np.ravel(x)
+		y = np.ravel(y)
 
+	N = len(x)
+	l = int((n+1)*(n+2)/2)		# Number of elements in beta
+	X = np.ones((N,l))
+
+	for i in range(1,n+1):
+		q = int((i)*(i+1)/2)
+		for k in range(i+1):
+			X[:,q+k] = x**(i-k) * y**k
+
+	return X
 
 def DesignDesign(x, y, power):
     concat_x   = np.array([0,0])
     concat_y   = np.array([0,0])
+
 
     for i in range(power):
         toconcat_x = np.arange(i+1,-1,-1)
@@ -50,9 +69,13 @@ def DesignDesign(x, y, power):
 
     concat_x     = concat_x[2:len(concat_x)]
     concat_y     = concat_y[2:len(concat_y)]
-    DesignMatrix = np.empty((len(x),len(concat_x)))
 
+    X,Y          = np.meshgrid(x,y)
+    X            = np.ravel(X)
+    Y            = np.ravel(Y)
+    DesignMatrix = np.empty((len(X),len(concat_x)))
     for i in range(len(concat_x)):
-        DesignMatrix[:,i]   = (x**concat_x[i])*(y**concat_y[i])
+        DesignMatrix[:,i]   = (X**concat_x[i])*(Y**concat_y[i])
 
+    DesignMatrix = np.concatenate((np.ones((len(X),1)),DesignMatrix), axis = 1)
     return DesignMatrix
