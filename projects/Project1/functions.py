@@ -70,6 +70,14 @@ def CreateDesignMatrix_X_morten(x, y, n = 5):
 
 
 def DesignDesign(x, y, power):
+'''
+This function employs the underlying pattern governing a design matrix
+on the form [1,x,y,x**2,x*y,y**2,x**3,(x**2)*y,x*(y**2),y**3 ....]
+
+x_power=[0,1,0,2,1,0,3,2,1,0,4,3,2,1,0,...,n,n-1,...,1,0]
+y_power=[0,0,1,0,1,2,0,1,2,3,0,1,2,3,4,...,0,1,...,n-1,n]
+'''
+
     concat_x   = np.array([0,0])
     concat_y   = np.array([0,0])
 
