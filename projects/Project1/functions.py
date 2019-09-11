@@ -47,6 +47,17 @@ def R2Score(y, ytilde):
     denomenator  = (np.sum((y-mean_value)**2))
     return 1-(numerator/denomenator)
 
+def MAE(y, ytilde):
+    absolute_differance = np.abs(y-ytilde)
+    mean_absolute_error = (np.sum(absolute_differance))/y.size
+    return mean_absolute_error
+
+def MSLE(y, ytilde):
+    logterms_squared               = (np.log(1+y)  -  np.log(1+ytilde))**2
+    mean_squared_logarithmic_error = (np.sum(logterms_squared))/y.size
+    return mean_squared_logarithmic_error 
+
+
 
 def CreateDesignMatrix_X_morten(x, y, n = 5):
     """
