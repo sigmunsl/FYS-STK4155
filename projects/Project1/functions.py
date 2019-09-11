@@ -10,11 +10,13 @@ def FrankeFunction(x, y, noise_level=0):
     noise = noise_level*np.random.randn(len(x),len(y))
     return term1 + term2 + term3 + term4 + noise
 
+
 def OridinaryLeastSquares(design, data, test):
     inverse_term   = np.linalg.inv(design.T.dot(design))
     beta           = inverse_term.dot(design.T).dot(data)
     pred           = test @ beta
     return beta, pred
+
 
 def OridinaryLeastSquares_SVD(design, data, test):
     U,_sigma,V     = np.linalg.svd(design.T.dot(design))
@@ -30,20 +32,21 @@ def RidgeRegression(design, data, test, _lambda=0):
     pred           = test @ beta
     return beta, pred
 
+
 def VarianceBeta(design, _lambda=0):
     vb = np.linalg.inv(design.T.dot(design) + _lambda*np.eye((design.shape[1])))
     return np.diag(vb)
 
 def MSE(y, ytilde):
-    MeanSquaredError = (np.sum((y-ytilde)**2))/y.size
-    return MeanSquaredError
+    return (np.sum((y-ytilde)**2))/y.size
+
 
 def R2Score(y, ytilde):
     mean_value   = (np.sum(y))/y.size
     numerator    = (np.sum((y-ytilde)**2))
     denomenator  = (np.sum((y-mean_value)**2))
-    R2           = (1-(numerator/denomenator))
-    return R2
+    return 1-(numerator/denomenator)
+
 
 def CreateDesignMatrix_X_morten(x, y, n = 5):
     """
@@ -64,6 +67,7 @@ def CreateDesignMatrix_X_morten(x, y, n = 5):
             X[:,q+k] = x**(i-k) * y**k
 
     return X
+
 
 def DesignDesign(x, y, power):
     concat_x   = np.array([0,0])
