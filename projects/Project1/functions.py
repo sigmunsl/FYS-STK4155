@@ -90,16 +90,31 @@ def DesignDesign(x, y, power):
     return DesignMatrix
 
 
-def k_fold_cv(k, data, design, predictor, _lambda=0):
-    data = np.reshape(k, int(len(data)/k))
-    design = np.reshape(k, int(len(design[0, :])/k), len(design[:, 0]))
+def reshaper(k, data):
+    output = []
+    j = int(len(data)/k)
+    for i in range(k):
+        try:
+            output.append(data[i*j:(i+1)*j])
+        except IndexError:
+            output.append(data[i*j:])
+    return np.asarray(output)
+
+
+def k_fold_cv(k, indata, indesign, predictor, _lambda=0):
+    data = reshaper(k, indata)
+    design = reshaper(k, indesign)
     r2 = 0
     mse = 0
     for i in range(k):
+        tmp_design = design[np.arange(len(design))!=i]
+        tmp_design = tmp_design.reshape(tmp_design.shape[0]*tmp_design.shape[1], tmp_design.shape[2])
+        tmp_data = data[np.arange(len(data))!=i]
+        tmp_data = tmp_data.reshape(tmp_data.shape[0]*tmp_data.shape[1])
         if _lambda != 0:
-            beta, pred = predictor(design[np.arange(len(design))!=i], data[np.arange(len(data))!=i], design[i], _lambda)
+            beta, pred = predictor(tmp_design, tmp_data, design[i], _lambda)
         else:
-            beta, pred = predictor(design[np.arange(len(design))!=i], data[np.arange(len(data))!=i], design[i])
+            beta, pred = predictor(tmp_design, tmp_data, design[i])
         r2 += R2Score(data[i], pred)
         mse += MSE(data[i], pred)
     return r2/k, mse/k
