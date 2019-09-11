@@ -24,7 +24,7 @@ def OridinaryLeastSquares_SVD(design, data, test):
     return beta, pred
 
 
-def RidgeRegression(design, data, test, _lambda):
+def RidgeRegression(design, data, test, _lambda=0):
     inverse_term   = np.linalg.inv(design.T.dot(design)+ _lambda*np.eye((design.shape[1])))
     beta           = inverse_term.dot(design.T).dot(data)
     pred           = test @ beta
@@ -46,24 +46,24 @@ def R2Score(y, ytilde):
     return R2
 
 def CreateDesignMatrix_X_morten(x, y, n = 5):
-	"""
-	Function for creating a design X-matrix with rows [1, x, y, x^2, xy, xy^2 , etc.]
-	Input is x and y mesh or raveled mesh, keyword agruments n is the degree of the polynomial you want to fit.
-	"""
-	if len(x.shape) > 1:
-		x = np.ravel(x)
-		y = np.ravel(y)
+    """
+    Function for creating a design X-matrix with rows [1, x, y, x^2, xy, xy^2 , etc.]
+    Input is x and y mesh or raveled mesh, keyword agruments n is the degree of the polynomial you want to fit.
+    """
+    if len(x.shape) > 1:
+        x = np.ravel(x)
+        y = np.ravel(y)
 
-	N = len(x)
-	l = int((n+1)*(n+2)/2)		# Number of elements in beta
-	X = np.ones((N,l))
+    N = len(x)
+    l = int((n+1)*(n+2)/2)		# Number of elements in beta
+    X = np.ones((N,l))
 
-	for i in range(1,n+1):
-		q = int((i)*(i+1)/2)
-		for k in range(i+1):
-			X[:,q+k] = x**(i-k) * y**k
+    for i in range(1,n+1):
+        q = int((i)*(i+1)/2)
+        for k in range(i+1):
+            X[:,q+k] = x**(i-k) * y**k
 
-	return X
+    return X
 
 def DesignDesign(x, y, power):
     concat_x   = np.array([0,0])
@@ -90,8 +90,16 @@ def DesignDesign(x, y, power):
     return DesignMatrix
 
 
-def k_fold_cv(k, data, predictor):
-    data = np.reshape(k, int(len(data[0,:])/k), len(data[:,0]))
-    # fold fixed
-    # TODO: create loop, predict compute error and then return.
-    return
+def k_fold_cv(k, data, design, predictor, _lambda=0):
+    data = np.reshape(k, int(len(data)/k))
+    design = np.reshape(k, int(len(design[0, :])/k), len(design[:, 0]))
+    r2 = 0
+    mse = 0
+    for i in range(k):
+        if _lambda != 0:
+            beta, pred = predictor(design[np.arange(len(design))!=i], data[np.arange(len(data))!=i], design[i], _lambda)
+        else:
+            beta, pred = predictor(design[np.arange(len(design))!=i], data[np.arange(len(data))!=i], design[i])
+        r2 += R2Score(data[i], pred)
+        mse += MSE(data[i], pred)
+    return r2/k, mse/k
