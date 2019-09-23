@@ -34,60 +34,33 @@ def RidgeRegression(design, data, test, _lambda=0):
 
 
 def VarianceBeta(design, _lambda=0):
-    vb = np.linalg.inv(design.T.dot(design) + _lambda*np.eye((design.shape[1])))
-    return np.diag(vb)
+    return np.diag(np.linalg.inv(design.T.dot(design) + _lambda*np.eye((design.shape[1]))))
+
 
 def MSE(y, ytilde):
     return (np.sum((y-ytilde)**2))/y.size
 
 
 def R2Score(y, ytilde):
-    mean_value   = (np.sum(y))/y.size
-    numerator    = (np.sum((y-ytilde)**2))
-    denomenator  = (np.sum((y-mean_value)**2))
-    return 1-(numerator/denomenator)
+    return 1 - ((np.sum((y-ytilde)**2))/(np.sum((y-((np.sum(y))/y.size))**2)))
+
 
 def MAE(y, ytilde):
-    absolute_differance = np.abs(y-ytilde)
-    mean_absolute_error = (np.sum(absolute_differance))/y.size
-    return mean_absolute_error
+    return (np.sum(np.abs(y-ytilde)))/y.size
+
 
 def MSLE(y, ytilde):
-    logterms_squared               = (np.log(1+y)  -  np.log(1+ytilde))**2
-    mean_squared_logarithmic_error = (np.sum(logterms_squared))/y.size
-    return mean_squared_logarithmic_error 
-
-
-
-def CreateDesignMatrix_X_morten(x, y, n = 5):
-    """
-    Function for creating a design X-matrix with rows [1, x, y, x^2, xy, xy^2 , etc.]
-    Input is x and y mesh or raveled mesh, keyword agruments n is the degree of the polynomial you want to fit.
-    """
-    if len(x.shape) > 1:
-        x = np.ravel(x)
-        y = np.ravel(y)
-
-    N = len(x)
-    l = int((n+1)*(n+2)/2)		# Number of elements in beta
-    X = np.ones((N,l))
-
-    for i in range(1,n+1):
-        q = int((i)*(i+1)/2)
-        for k in range(i+1):
-            X[:,q+k] = x**(i-k) * y**k
-
-    return X
+    return (np.sum((np.log(1+y)  -  np.log(1+ytilde))**2))/y.size
 
 
 def DesignDesign(x, y, power):
-'''
-This function employs the underlying pattern governing a design matrix
-on the form [1,x,y,x**2,x*y,y**2,x**3,(x**2)*y,x*(y**2),y**3 ....]
+    '''
+    This function employs the underlying pattern governing a design matrix
+    on the form [1,x,y,x**2,x*y,y**2,x**3,(x**2)*y,x*(y**2),y**3 ....]
 
-x_power=[0,1,0,2,1,0,3,2,1,0,4,3,2,1,0,...,n,n-1,...,1,0]
-y_power=[0,0,1,0,1,2,0,1,2,3,0,1,2,3,4,...,0,1,...,n-1,n]
-'''
+    x_power=[0,1,0,2,1,0,3,2,1,0,4,3,2,1,0,...,n,n-1,...,1,0]
+    y_power=[0,0,1,0,1,2,0,1,2,3,0,1,2,3,4,...,0,1,...,n-1,n]
+    '''
 
     concat_x   = np.array([0,0])
     concat_y   = np.array([0,0])
@@ -99,8 +72,8 @@ y_power=[0,0,1,0,1,2,0,1,2,3,0,1,2,3,4,...,0,1,...,n-1,n]
         concat_x   = np.concatenate((concat_x,toconcat_x))
         concat_y   = np.concatenate((concat_y,toconcat_y))
 
-    concat_x     = concat_x[2:len(concat_x)]
-    concat_y     = concat_y[2:len(concat_y)]
+    concat_x     = concat_x[1:len(concat_x)]
+    concat_y     = concat_y[1:len(concat_y)]
 
     X,Y          = np.meshgrid(x,y)
     X            = np.ravel(X)
@@ -109,7 +82,7 @@ y_power=[0,0,1,0,1,2,0,1,2,3,0,1,2,3,4,...,0,1,...,n-1,n]
     for i in range(len(concat_x)):
         DesignMatrix[:,i]   = (X**concat_x[i])*(Y**concat_y[i])
 
-    DesignMatrix = np.concatenate((np.ones((len(X),1)),DesignMatrix), axis = 1)
+    #DesignMatrix = np.concatenate((np.ones((len(X),1)),DesignMatrix), axis = 1)
     return DesignMatrix
 
 
@@ -124,9 +97,12 @@ def reshaper(k, data):
     return np.asarray(output)
 
 
-def k_fold_cv(k, indata, indesign, predictor, _lambda=0):
-    data = reshaper(k, indata)
-    design = reshaper(k, indesign)
+def k_fold_cv(k, indata, indesign, predictor, _lambda=0, shuffle=False):
+    mask = np.arange(indata.shape[0])
+    if shuffle:
+        np.random.shuffle(mask)
+    data = reshaper(k, indata[mask])
+    design = reshaper(k, indesign[mask])
     r2 = 0
     mse = 0
     for i in range(k):
