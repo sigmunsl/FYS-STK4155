@@ -104,7 +104,9 @@ def k_fold_cv(k, indata, indesign, predictor, _lambda=0, shuffle=False):
     data = reshaper(k, indata[mask])
     design = reshaper(k, indesign[mask])
     r2 = 0
+    r2_in = 0
     mse = 0
+    mse_in = 0
     for i in range(k):
         tmp_design = design[np.arange(len(design))!=i]
         tmp_design = tmp_design.reshape(tmp_design.shape[0]*tmp_design.shape[1], tmp_design.shape[2])
@@ -115,5 +117,8 @@ def k_fold_cv(k, indata, indesign, predictor, _lambda=0, shuffle=False):
         else:
             beta, pred = predictor(tmp_design, tmp_data, design[i])
         r2 += R2Score(data[i], pred)
+        r2_in +=R2Score(tmp_data,tmp_design @ beta)
         mse += MSE(data[i], pred)
-    return r2/k, mse/k
+        mse_in += MSE(tmp_data,tmp_design @ beta)
+
+    return r2/k, mse/k, r2_in/k, mse_in/k
