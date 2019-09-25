@@ -88,11 +88,11 @@ def DesignDesign(x, y, power):
 
 def reshaper(k, data):
     output = []
-    j = int(len(data)/k)
+    j = int(np.ceil(len(data)/k))
     for i in range(k):
-        try:
+        if i<k:
             output.append(data[i*j:(i+1)*j])
-        except IndexError:
+        else:
             output.append(data[i*j:])
     return np.asarray(output)
 
@@ -103,22 +103,29 @@ def k_fold_cv(k, indata, indesign, predictor, _lambda=0, shuffle=False):
         np.random.shuffle(mask)
     data = reshaper(k, indata[mask])
     design = reshaper(k, indesign[mask])
-    r2 = 0
+    r2_out = 0
     r2_in = 0
-    mse = 0
+    mse_out = 0
     mse_in = 0
+    bias = 0
+    variance = 0
     for i in range(k):
-        tmp_design = design[np.arange(len(design))!=i]
-        tmp_design = tmp_design.reshape(tmp_design.shape[0]*tmp_design.shape[1], tmp_design.shape[2])
+        tmp_design = design[np.arange(len(design))!=i]      # Featch all but the i-th element
+        #tmp_design = tmp_design.reshape(tmp_design.shape[0]*tmp_design.shape[1], tmp_design.shape[2]) #reshape from 3D to 2D matrix
+        tmp_design=np.concatenate(tmp_design,axis=0)
         tmp_data = data[np.arange(len(data))!=i]
-        tmp_data = tmp_data.reshape(tmp_data.shape[0]*tmp_data.shape[1])
+        #tmp_data = tmp_data.reshape(tmp_data.shape[0]*tmp_data.shape[1])    # reshape from 2D to 1D
+        tmp_data = np.concatenate(tmp_data,axis=0)
         if _lambda != 0:
             beta, pred = predictor(tmp_design, tmp_data, design[i], _lambda)
         else:
             beta, pred = predictor(tmp_design, tmp_data, design[i])
-        r2 += R2Score(data[i], pred)
+        r2_out += R2Score(data[i], pred)
         r2_in +=R2Score(tmp_data,tmp_design @ beta)
-        mse += MSE(data[i], pred)
+        mse_out += MSE(data[i], pred)
         mse_in += MSE(tmp_data,tmp_design @ beta)
 
-    return r2/k, mse/k, r2_in/k, mse_in/k
+        bias += np.mean((data[i]-np.mean(pred))**2)
+        variance += np.mean((pred-np.mean(pred))**2)
+
+    return r2_out/k, mse_out/k, r2_in/k, mse_in/k, bias/k, variance/k
